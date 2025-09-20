@@ -39,6 +39,13 @@
 - `analysis/validate_analysis.py` 重新计算评分表，检查与存档 CSV 的行覆盖、分数一致性、分档标签、支柱权重等指标，并生成 `results/validation_report.json` 与 `results/validation_report.md` 总结 PASS/REVIEW 结果。【F:analysis/validate_analysis.py†L1-L135】
 - 验证脚本还确认所有支柱与组件分数均处于 `[0,1]` 区间，观察到的最大偏差小于 `1e-6`，确保权重组合逻辑无误。
 
+### 4.1 数据分析合理性复盘
+- **外部基准对照**：与离线保存的 PHL 权威候选体清单逐一比对，`phl_confidence` 字段标记一致、偏高、偏低三种情形，用于解释与既有文献的差异来源，并在讲稿中着重说明高分却缺席权威榜单的原因（例如缺乏质量测量或星噪声不确定）。【F:analysis/habitable_priority.py†L208-L244】【F:results/habitable_authoritative_comparison.csv†L1-L22】
+- **变量敏感性检查**：验证脚本重复计算四大支柱并与持久化 CSV 对比，任何单项分差超过 `1e-6` 会触发 `REVIEW` 标记，从而防止后续修改造成静默漂移。【F:analysis/validate_analysis.py†L77-L120】【F:results/validation_report.md†L1-L13】
+- **采样充分性**：当前共有 31 颗行星满足数据完备性，占 `default_flag=1` 样本的 0.9%，其余记录因缺失关键参数或超出物理范围被排除；脚本在日志中输出被过滤原因，为 Q&A 准备充分的合理性解释。【F:analysis/habitable_priority.py†L63-L196】【F:results/habitable_priority_scores.csv†L1-L32】
+- **权重可解释性**：权重设置（气候 0.45、结构 0.25、可观测性 0.22、系统 0.08）在文档与讲稿中保持一致，并通过 `results/validation_report.json` 的 `weight_check` 字段确认总和恒为 1；如需调参，可依赖脚本暴露的单支柱得分快速进行灵敏度分析。【F:analysis/habitable_priority.py†L154-L196】【F:results/validation_report.json†L1-L39】
+- **可观测性现实约束**：可观测性支柱结合过境深度（ppm）、视星等与距离，确保推荐目标在 JWST / 罗曼 / ELT 的噪声阈值附近具备可行信噪比；如 TOI-2095 c 过境深度 ~768 ppm、视星等 13.19 等数据将在演讲中引用以支撑科学合理性。【F:analysis/habitable_priority.py†L132-L144】【F:results/habitable_priority_scores.csv†L1-L16】
+
 ## 5. 可视化资产与扩展
 - **静态素材**：`analysis/habitable_priority.py` 运行后生成散点、柱状、雷达图；`analysis/ps_overview.py` 生成背景统计图。这些 PNG 文件保存在本地 `figures/` 目录，便于插入幻灯片或报告。
 - **交互式网站**：`webapp/index.html` 集成四个 Plotly 图层，可直接部署或嵌入 DevPost 页面，支持鼠标悬停查看支柱得分、过境深度、观测设施等细节。
