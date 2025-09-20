@@ -1,7 +1,4 @@
-"""Exploratory analysis and visualizations for the NASA Exoplanet Archive
-Planetary Systems table used in the CDC hackathon."""
-
-from __future__ import annotations
+"""Baseline exploratory plots for the NASA planetary systems snapshot."""
 
 from pathlib import Path
 
@@ -24,39 +21,6 @@ def load_default_planets() -> pd.DataFrame:
     df = pd.read_csv(DATA_PATH, comment="#")
     df = df[df["default_flag"] == 1].copy()
     return df
-
-
-def plot_discoveries_by_method(df: pd.DataFrame) -> None:
-    """Create a stacked area chart of discoveries per year and detection method."""
-
-    top_methods = (
-        df["discoverymethod"].value_counts().head(4).index.tolist()
-    )
-    discoveries = (
-        df.assign(
-            method=df["discoverymethod"].fillna("Unknown"),
-            year=df["disc_year"],
-        )
-        .query("year.notna()")
-        .assign(
-            method=lambda d: d["method"].where(d["method"].isin(top_methods), "Other")
-        )
-        .groupby(["year", "method"], as_index=False)
-        .size()
-    )
-
-    pivot = discoveries.pivot(index="year", columns="method", values="size").fillna(0)
-    pivot = pivot.sort_index()
-
-    plt.figure(figsize=(10, 6))
-    plt.stackplot(pivot.index, pivot.T, labels=pivot.columns)
-    plt.title("Confirmed exoplanet discoveries by detection method")
-    plt.xlabel("Discovery year")
-    plt.ylabel("Number of planets")
-    plt.legend(loc="upper left")
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "discoveries_by_method.png", dpi=300)
-    plt.close()
 
 
 def plot_radius_vs_teff(df: pd.DataFrame) -> None:
@@ -115,35 +79,47 @@ def plot_orbital_period_by_multiplicity(df: pd.DataFrame) -> None:
     plt.close()
 
 
-def summarize_key_metrics(df: pd.DataFrame) -> pd.DataFrame:
-    """Return summary statistics used in the report."""
+def plot_distance_histogram(df: pd.DataFrame) -> None:
+    """Visualise the distribution of system distances relevant for follow-up planning."""
+
+    filtered = df.dropna(subset=["sy_dist"]).copy()
+    filtered = filtered[filtered["sy_dist"] <= 2000]
+
+    plt.figure(figsize=(9, 6))
+    sns.histplot(filtered["sy_dist"], bins=40, color="#0b3d91")
+    plt.title("Distribution of confirmed system distances")
+    plt.xlabel("Distance (parsec)")
+    plt.ylabel("Number of planets")
+    plt.tight_layout()
+    plt.savefig(FIG_DIR / "distance_histogram.png", dpi=300)
+    plt.close()
+
+
+def summarize_key_metrics(df: pd.DataFrame) -> pd.Series:
+    """Return summary statistics used in documentation."""
 
     summary = {}
     summary["total_planets"] = len(df)
     summary["median_disc_year"] = df["disc_year"].median()
 
-    latest_decade = df[df["disc_year"] >= 2015]
-    summary["recent_transits_share"] = (
-        (latest_decade["discoverymethod"] == "Transit").mean()
-    )
-
-    temp_filtered = df.dropna(subset=["pl_eqt", "pl_rade"])
-    summary["cool_small_fraction"] = (
-        temp_filtered["pl_eqt"].between(200, 400)
-        & temp_filtered["pl_rade"].between(0.5, 1.5)
+    habitable_window = df.dropna(subset=["pl_eqt", "pl_insol", "pl_rade"]).copy()
+    summary["temperate_fraction"] = (
+        habitable_window["pl_eqt"].between(200, 350)
+        & habitable_window["pl_insol"].between(0.2, 2.5)
+        & habitable_window["pl_rade"].between(0.5, 2.5)
     ).mean()
 
-    multi = df[df["sy_pnum"] >= 3]
-    summary["multi_systems"] = multi["hostname"].nunique()
+    nearby = df[df["sy_dist"].between(0, 100)].copy()
+    summary["nearby_targets"] = len(nearby)
 
     return pd.Series(summary)
 
 
 if __name__ == "__main__":
     planets = load_default_planets()
-    plot_discoveries_by_method(planets)
     plot_radius_vs_teff(planets)
     plot_orbital_period_by_multiplicity(planets)
+    plot_distance_histogram(planets)
 
     stats = summarize_key_metrics(planets)
     print(stats.to_string())

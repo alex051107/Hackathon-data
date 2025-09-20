@@ -1,29 +1,9 @@
 {
   "checks": [
     {
-      "name": "Method timeseries consistency",
-      "status": "pass",
-      "details": "Maximum difference between recomputed and stored counts: 0.00e+00"
-    },
-    {
-      "name": "Transit dominance cross-check",
-      "status": "pass",
-      "details": "Transit share since 2015 (catalog): 0.7782; timeseries-derived: 0.7782; |delta|=0.00e+00"
-    },
-    {
-      "name": "Facility share normalisation",
-      "status": "pass",
-      "details": "Maximum deviation from unit share per facility: 0.00e+00"
-    },
-    {
-      "name": "Forecast horizon",
-      "status": "pass",
-      "details": "Minimum horizon rows per method: 5; forecast extends through 2030, expected 2030."
-    },
-    {
       "name": "Priority candidate coverage",
       "status": "pass",
-      "details": "Rows in model: 37; stored: 37; missing=0; extra=0"
+      "details": "Rows in model: 31; stored: 31; missing=0; extra=0"
     },
     {
       "name": "Priority score equality",
@@ -36,9 +16,24 @@
       "details": "Priority bands identical"
     },
     {
-      "name": "High-priority proportion",
+      "name": "Component score bounds",
       "status": "pass",
-      "details": "High priority share = 0.0270"
+      "details": "Component score range: [0.000, 1.000]"
+    },
+    {
+      "name": "Observability weighting",
+      "status": "pass",
+      "details": "Max |observability_score - weighted components| = 0.00e+00"
+    },
+    {
+      "name": "Aggregate weighting",
+      "status": "pass",
+      "details": "Max |priority_score - weighted pillars| = 0.00e+00"
+    },
+    {
+      "name": "Priority band distribution",
+      "status": "pass",
+      "details": "Context: 12, Follow-up: 11, High Priority: 8"
     }
   ]
 }
