@@ -1,0 +1,44 @@
+{
+  "checks": [
+    {
+      "name": "Method timeseries consistency",
+      "status": "pass",
+      "details": "Maximum difference between recomputed and stored counts: 0.00e+00"
+    },
+    {
+      "name": "Transit dominance cross-check",
+      "status": "pass",
+      "details": "Transit share since 2015 (catalog): 0.7782; timeseries-derived: 0.7782; |delta|=0.00e+00"
+    },
+    {
+      "name": "Facility share normalisation",
+      "status": "pass",
+      "details": "Maximum deviation from unit share per facility: 0.00e+00"
+    },
+    {
+      "name": "Forecast horizon",
+      "status": "pass",
+      "details": "Minimum horizon rows per method: 5; forecast extends through 2030, expected 2030."
+    },
+    {
+      "name": "Priority candidate coverage",
+      "status": "pass",
+      "details": "Rows in model: 37; stored: 37; missing=0; extra=0"
+    },
+    {
+      "name": "Priority score equality",
+      "status": "pass",
+      "details": "Max |priority_score_model - priority_score_stored| = 5.55e-17"
+    },
+    {
+      "name": "Priority band labels",
+      "status": "pass",
+      "details": "Priority bands identical"
+    },
+    {
+      "name": "High-priority proportion",
+      "status": "pass",
+      "details": "High priority share = 0.0270"
+    }
+  ]
+}
